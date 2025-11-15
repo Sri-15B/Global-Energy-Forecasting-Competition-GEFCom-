@@ -35,6 +35,7 @@ export default function Navbar() {
       </Link>
 
       {/* Desktop Menu */}
+      <a href="/bulk" className="hover:underline">Bulk Predict</a>
       <div className="hidden md:flex items-center gap-6">
         <Link className={isActive("/")} to="/">Home</Link>
         <Link className={isActive("/predict")} to="/predict">Predict</Link>
