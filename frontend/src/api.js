@@ -1,15 +1,14 @@
-const API_BASE = "https://global-energy-forecasting-competition.onrender.com";
+import axios from "axios";
 
-export async function getForecast(date) {
-  const response = await fetch(`${API_BASE}/predict`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ date }),
-  });
+const API_BASE = "https://your-backend-url.onrender.com"; 
+// Replace with your actual backend URL if needed
 
-  if (!response.ok) {
-    throw new Error("Backend error: " + response.status);
+export const predictLoad = async (data) => {
+  try {
+    const res = await axios.post(`${API_BASE}/predict`, data);
+    return res.data;
+  } catch (err) {
+    console.error("Prediction error:", err);
+    throw err;
   }
-
-  return response.json();
-}
+};
