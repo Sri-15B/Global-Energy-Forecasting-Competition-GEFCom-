@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { predictLoad } from "../api";
 import ExplanationModal from "../components/ExplanationModal";
 
 export default function Predict() {
@@ -6,46 +7,30 @@ export default function Predict() {
   const [prediction, setPrediction] = useState(null);
   const [showExplain, setShowExplain] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-
-  // ✅ Inline API function (Fix for Netlify)
-  async function predictLoad(features) {
-    try {
-      const res = await fetch(
-        "https://global-energy-forecasting-competition.onrender.com/predict",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ features }),
-        }
-      );
-
-      if (!res.ok) {
-        throw new Error("Backend error: " + res.status);
-      }
-
-      return res.json();
-    } catch (err) {
-      throw err;
-    }
-  }
+  const [errorMsg, setErrorMsg] = useState("");
 
   const runPredict = async () => {
-    setLoading(true);
-    setError("");
-    setPrediction(null);
+    setErrorMsg("");
 
-    try {
-      const nums = inputs.map(Number);
-      const out = await predictLoad(nums);
-
-      // expect {prediction: value}
-      setPrediction(out.prediction);
-    } catch (err) {
-      setError(err.message);
+    // Basic input validation
+    if (inputs.some((v) => v === "")) {
+      setErrorMsg("⚠ Please fill all 5 feature values before predicting.");
+      return;
     }
 
+    const nums = inputs.map(Number);
+    setLoading(true);
+
+    const out = await predictLoad(nums);
+
     setLoading(false);
+
+    // If backend returned fallback 0 due to error
+    if (out === 0) {
+      setErrorMsg("❌ Backend error — check if your API is deployed correctly.");
+    }
+
+    setPrediction(out);
   };
 
   return (
@@ -54,8 +39,8 @@ export default function Predict() {
         Predict Energy Load
       </h2>
 
-      {/* Input Boxes */}
-      <div className="grid grid-cols-1 sm:grid-cols-5 gap-3 mb-6">
+      {/* Inputs */}
+      <div className="grid grid-cols-1 sm:grid-cols-5 gap-3 mb-4">
         {inputs.map((v, i) => (
           <input
             key={i}
@@ -64,15 +49,20 @@ export default function Predict() {
             placeholder={`Feature ${i + 1}`}
             type="number"
             onChange={(e) => {
-              const newArr = [...inputs];
-              newArr[i] = e.target.value;
-              setInputs(newArr);
+              const arr = [...inputs];
+              arr[i] = e.target.value;
+              setInputs(arr);
             }}
           />
         ))}
       </div>
 
-      {/* Predict Button */}
+      {/* Error message */}
+      {errorMsg && (
+        <p className="text-red-600 font-semibold mb-3">{errorMsg}</p>
+      )}
+
+      {/* Predict button */}
       <button
         className="bg-blue-600 text-white px-5 py-2 rounded-lg hover:bg-blue-700 transition"
         onClick={runPredict}
@@ -81,18 +71,13 @@ export default function Predict() {
         {loading ? "Predicting..." : "Predict"}
       </button>
 
-      {/* Error Message */}
-      {error && (
-        <p className="text-red-600 font-semibold mt-4">
-          ❌ {error}
-        </p>
-      )}
-
       {/* Prediction Output */}
       {prediction !== null && (
-        <div className="mt-6 bg-white p-4 rounded-xl shadow text-center">
+        <div className="mt-6 bg-gray-50 p-4 rounded-xl shadow text-center">
           <h3 className="text-xl font-bold text-blue-700">Predicted Load:</h3>
-          <p className="text-3xl font-bold mb-4">{prediction.toFixed(2)} MW</p>
+          <p className="text-3xl font-bold mb-4">
+            {prediction.toFixed(2)} MW
+          </p>
 
           <button
             onClick={() => setShowExplain(true)}
