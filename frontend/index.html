@@ -13,27 +13,42 @@
 <div class="sidebar">
   <div class="logo">Energy Forecast</div>
   <nav>
-    <button class="nav-btn active" data-target="prediction">Prediction</button>
-    <button class="nav-btn" data-target="analytics">Analytics</button>
-    <button class="nav-btn" data-target="model">Models</button>
+    <button class="nav-btn active" data-target="prediction">
+      <img src="assets/icons/prediction.svg" class="inline w-5 h-5 mr-2"> Prediction
+    </button>
+    <button class="nav-btn" data-target="analytics">
+      <img src="assets/icons/analytics.svg" class="inline w-5 h-5 mr-2"> Analytics
+    </button>
+    <button class="nav-btn" data-target="model">
+      <img src="assets/icons/model.svg" class="inline w-5 h-5 mr-2"> Models
+    </button>
   </nav>
-  <button id="themeToggle" style="margin:20px;">Toggle Dark/Light</button>
+  <button id="themeToggle">
+    <img src="assets/icons/theme.svg" class="inline w-5 h-5 mr-1"> Toggle Dark/Light
+  </button>
 </div>
 
 <!-- Main content -->
-<div class="main" style="display:none;">
-  <!-- Pages -->
+<div class="main" style="display:block; padding:20px;">
+  <!-- Prediction Page -->
   <div id="prediction" class="page" style="display:block;">
-    <h2>Prediction</h2>
-    <input type="date" id="dateInput">
-    <button id="predictBtn">Predict</button>
-    <div id="predictionOutput"></div>
-    <div id="aiPopup"></div>
+    <h2>Energy Prediction</h2>
+    <div class="prediction-container">
+      <label for="dateInput">Select Date:</label>
+      <input type="date" id="dateInput">
+      <button id="predictBtn">Predict</button>
+    </div>
+    <div id="predictionOutput" style="margin-top:10px; font-weight:bold;"></div>
+    <div id="aiPopup" style="margin-top:10px; color: #2563EB;"></div>
   </div>
+
+  <!-- Analytics Page -->
   <div id="analytics" class="page" style="display:none;">
     <h2>Analytics Dashboard</h2>
     <canvas id="loadChart"></canvas>
   </div>
+
+  <!-- Model Comparison Page -->
   <div id="model" class="page" style="display:none;">
     <h2>Model Comparison</h2>
     <canvas id="modelChart"></canvas>
@@ -67,5 +82,6 @@ document.getElementById('predictBtn')?.addEventListener('click', async ()=>{
   }
 });
 </script>
+
 </body>
 </html>
