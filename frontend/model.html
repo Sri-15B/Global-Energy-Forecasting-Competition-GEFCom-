@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Model Comparison</title>
+<link rel="stylesheet" href="css/style.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="light">
+
+<div class="sidebar">
+  <div class="logo">Energy Forecast</div>
+  <nav>
+    <button class="nav-btn" data-target="prediction">Prediction</button>
+    <button class="nav-btn" data-target="analytics">Analytics</button>
+    <button class="nav-btn active" data-target="model">Models</button>
+  </nav>
+  <button id="themeToggle" style="margin:20px;">Toggle Dark/Light</button>
+</div>
+
+<div class="main">
+  <div id="modelPage" class="page">
+    <h2>Model Comparison</h2>
+    <canvas id="modelChart"></canvas>
+  </div>
+</div>
+
+<script src="js/main.js"></script>
+<script src="js/charts.js"></script>
+<script>
+  updateCharts({
+    modelAccuracy: [85, 88, 92]
+  });
+</script>
+</body>
+</html>
