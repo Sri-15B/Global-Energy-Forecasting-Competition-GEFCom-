@@ -1,174 +1,71 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Energy Forecast Dashboard</title>
-
-  <!-- Tailwind CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Chart.js CDN -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <!-- Font Awesome for icons -->
-  <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
-
-  <style>
-    body { transition: background-color 0.3s, color 0.3s; }
-    .active-nav { background-color: #3b82f6; color: white; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Energy Dashboard</title>
+<link rel="stylesheet" href="css/style.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
-<body class="bg-gray-100 text-gray-900 flex">
+<body class="light">
 
-  <!-- =================== SIDEBAR =================== -->
-  <aside class="w-64 bg-white dark:bg-gray-800 h-screen shadow-md flex flex-col">
-    <div class="p-6 text-center font-bold text-lg border-b border-gray-200 dark:border-gray-700">Energy Dashboard</div>
-    <nav class="flex flex-col p-4 space-y-2">
-      <button class="nav-btn active-nav px-4 py-2 rounded" data-target="predictionSection"><i class="fas fa-bolt mr-2"></i>Prediction</button>
-      <button class="nav-btn px-4 py-2 rounded" data-target="analyticsSection"><i class="fas fa-chart-line mr-2"></i>Analytics</button>
-      <button class="nav-btn px-4 py-2 rounded" data-target="modelSection"><i class="fas fa-cogs mr-2"></i>Model Comparison</button>
-    </nav>
-    <div class="mt-auto p-4">
-      <button id="themeToggle" class="w-full px-3 py-2 rounded bg-blue-600 text-white hover:bg-blue-700">Toggle Dark/Light</button>
-    </div>
-  </aside>
+<!-- Sidebar -->
+<div class="sidebar">
+  <div class="logo">Energy Forecast</div>
+  <nav>
+    <button class="nav-btn active" data-target="prediction">Prediction</button>
+    <button class="nav-btn" data-target="analytics">Analytics</button>
+    <button class="nav-btn" data-target="model">Models</button>
+  </nav>
+  <button id="themeToggle" style="margin:20px;">Toggle Dark/Light</button>
+</div>
 
-  <!-- =================== MAIN CONTENT =================== -->
-  <main class="flex-1 p-6 overflow-auto">
+<!-- Main content -->
+<div class="main" style="display:none;">
+  <!-- Pages -->
+  <div id="prediction" class="page" style="display:block;">
+    <h2>Prediction</h2>
+    <input type="date" id="dateInput">
+    <button id="predictBtn">Predict</button>
+    <div id="predictionOutput"></div>
+    <div id="aiPopup"></div>
+  </div>
+  <div id="analytics" class="page" style="display:none;">
+    <h2>Analytics Dashboard</h2>
+    <canvas id="loadChart"></canvas>
+  </div>
+  <div id="model" class="page" style="display:none;">
+    <h2>Model Comparison</h2>
+    <canvas id="modelChart"></canvas>
+  </div>
+</div>
 
-    <!-- =================== LOGIN SECTION =================== -->
-    <section id="loginSection" class="flex flex-col items-center justify-center h-screen">
-      <div class="bg-white p-6 rounded shadow-md w-full max-w-sm">
-        <h2 class="text-2xl font-bold mb-4 text-center">Login</h2>
-        <input type="text" id="username" placeholder="Username" class="w-full mb-3 p-2 border rounded">
-        <input type="password" id="password" placeholder="Password" class="w-full mb-3 p-2 border rounded">
-        <button id="loginBtn" class="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700">Login</button>
-      </div>
-    </section>
+<!-- JS -->
+<script src="js/main.js"></script>
+<script src="js/charts.js"></script>
+<script>
+const backendURL = "https://global-energy-forecasting-competition.onrender.com/predict";
 
-    <!-- =================== PREDICTION PAGE =================== -->
-    <section id="predictionSection" class="hidden">
-      <div class="bg-white dark:bg-gray-800 p-6 rounded shadow-md mb-6">
-        <h2 class="text-xl font-bold mb-2">Energy Load Prediction</h2>
-        <input type="date" id="dateInput" class="p-2 border rounded mb-2">
-        <button id="predictBtn" class="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 mb-4">Predict</button>
-        <div id="predictionOutput" class="text-lg font-semibold"></div>
-        <div id="aiPopup" class="hidden mt-2 p-2 bg-yellow-100 rounded shadow-md"></div>
-      </div>
-    </section>
+document.getElementById('predictBtn')?.addEventListener('click', async ()=>{
+  const date = document.getElementById('dateInput').value;
+  if(!date) return alert("Select a date!");
+  document.getElementById('predictionOutput').textContent = "Loading...";
+  document.getElementById('aiPopup').textContent = "";
 
-    <!-- =================== ANALYTICS PAGE =================== -->
-    <section id="analyticsSection" class="hidden">
-      <div class="bg-white dark:bg-gray-800 p-6 rounded shadow-md mb-6">
-        <h2 class="text-xl font-bold mb-4">Analytics Dashboard</h2>
-        <canvas id="loadChart" class="w-full"></canvas>
-      </div>
-    </section>
-
-    <!-- =================== MODEL COMPARISON PAGE =================== -->
-    <section id="modelSection" class="hidden">
-      <div class="bg-white dark:bg-gray-800 p-6 rounded shadow-md mb-6">
-        <h2 class="text-xl font-bold mb-4">Model Comparison</h2>
-        <canvas id="modelChart" class="w-full"></canvas>
-      </div>
-    </section>
-
-  </main>
-
-  <!-- =================== SCRIPTS =================== -->
-  <script>
-    // ===== Dark/Light Theme Toggle =====
-    const themeToggle = document.getElementById('themeToggle');
-    themeToggle.addEventListener('click', () => {
-      document.body.classList.toggle('bg-gray-900');
-      document.body.classList.toggle('text-white');
-      document.body.classList.toggle('bg-gray-100');
-      document.body.classList.toggle('text-gray-900');
+  try {
+    const res = await fetch(backendURL,{
+      method:"POST",
+      headers:{ "Content-Type":"application/json" },
+      body: JSON.stringify({ date })
     });
-
-    // ===== LOGIN FUNCTIONALITY =====
-    const loginSection = document.getElementById('loginSection');
-    const loginBtn = document.getElementById('loginBtn');
-    const mainSections = ["predictionSection", "analyticsSection", "modelSection"];
-
-    loginBtn.addEventListener('click', () => {
-      loginSection.classList.add('hidden');
-      document.getElementById('predictionSection').classList.remove('hidden');
-    });
-
-    // ===== SIDEBAR NAVIGATION =====
-    const navButtons = document.querySelectorAll('.nav-btn');
-    navButtons.forEach(btn => {
-      btn.addEventListener('click', () => {
-        // Highlight active button
-        navButtons.forEach(b => b.classList.remove('active-nav'));
-        btn.classList.add('active-nav');
-        // Show target section
-        mainSections.forEach(sec => document.getElementById(sec).classList.add('hidden'));
-        document.getElementById(btn.dataset.target).classList.remove('hidden');
-      });
-    });
-
-    // ===== Backend API URL =====
-    const backendURL = "https://global-energy-forecasting-competition.onrender.com/predict";
-
-    // ===== PREDICTION FUNCTION =====
-    const predictBtn = document.getElementById('predictBtn');
-    const dateInput = document.getElementById('dateInput');
-    const predictionOutput = document.getElementById('predictionOutput');
-    const aiPopup = document.getElementById('aiPopup');
-
-    predictBtn.addEventListener('click', async () => {
-      const selectedDate = dateInput.value;
-      if (!selectedDate) { alert("Please select a date!"); return; }
-
-      predictionOutput.textContent = "Loading...";
-      aiPopup.textContent = "";
-      aiPopup.classList.add('hidden');
-
-      try {
-        const response = await fetch(backendURL, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ date: selectedDate })
-        });
-        const data = await response.json();
-
-        predictionOutput.textContent = `Predicted Energy Load: ${data.predictedLoad} MW`;
-        aiPopup.textContent = `AI Insight: ${data.insight || "Energy demand normal for selected date."}`;
-        aiPopup.classList.remove('hidden');
-
-        updateCharts(data);
-      } catch (error) {
-        predictionOutput.textContent = "Error fetching prediction!";
-        console.error(error);
-      }
-    });
-
-    // ===== CHARTS SETUP =====
-    const loadCtx = document.getElementById('loadChart').getContext('2d');
-    const modelCtx = document.getElementById('modelChart').getContext('2d');
-
-    let loadChart = new Chart(loadCtx, {
-      type: 'line',
-      data: { labels: [], datasets: [{ label: 'Actual Load', data: [], borderColor: 'blue', fill: false }, { label: 'Predicted Load', data: [], borderColor: 'red', fill: false }] },
-      options: { responsive: true, animation: { duration: 500 } }
-    });
-
-    let modelChart = new Chart(modelCtx, {
-      type: 'bar',
-      data: { labels: ['ARIMA','Prophet','LSTM'], datasets: [{ label: 'Model Accuracy (%)', data: [0,0,0], backgroundColor: ['blue','green','red'] }] },
-      options: { responsive: true, animation: { duration: 500 } }
-    });
-
-    function updateCharts(data) {
-      loadChart.data.labels = data.dates || ['Day 1','Day 2','Day 3'];
-      loadChart.data.datasets[0].data = data.actual || [50,60,55];
-      loadChart.data.datasets[1].data = data.predicted || [52,63,54];
-      loadChart.update();
-
-      modelChart.data.datasets[0].data = data.modelAccuracy || [85,88,92];
-      modelChart.update();
-    }
-  </script>
+    const data = await res.json();
+    document.getElementById('predictionOutput').textContent = `Predicted Load: ${data.predictedLoad} MW`;
+    document.getElementById('aiPopup').textContent = `AI Insight: ${data.insight || "Normal energy demand"}`;
+    updateCharts(data);
+  } catch(e){
+    document.getElementById('predictionOutput').textContent = "Error fetching prediction!";
+  }
+});
+</script>
 </body>
 </html>
