@@ -1,77 +1,89 @@
-// Get canvas contexts
-const loadCtx = document.getElementById('loadChart')?.getContext('2d');
-const modelCtx = document.getElementById('modelChart')?.getContext('2d');
+// ===============================
+// Sidebar Navigation
+// ===============================
+const navButtons = document.querySelectorAll('.nav-btn');
+const pages = document.querySelectorAll('.page');
 
-// Line chart for actual vs predicted energy load
-let loadChart = loadCtx && new Chart(loadCtx, {
-    type: 'line',
-    data: {
-        labels: [], // Dates
-        datasets: [
-            {
-                label: 'Actual Load (MW)',
-                data: [],
-                borderColor: '#2563EB',
-                backgroundColor: 'rgba(37,99,235,0.2)',
-                fill: true,
-                tension: 0.3
-            },
-            {
-                label: 'Predicted Load (MW)',
-                data: [],
-                borderColor: '#EF4444',
-                backgroundColor: 'rgba(239,68,68,0.2)',
-                fill: true,
-                tension: 0.3
+navButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+        // Remove active class from all buttons
+        navButtons.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+
+        // Show the target page, hide others
+        const target = btn.dataset.target;
+        pages.forEach(p => {
+            if (p.id === target) {
+                p.style.display = 'block';
+                p.style.opacity = 0;
+                setTimeout(()=>p.style.opacity=1, 50); // smooth fade-in
+            } else {
+                p.style.display = 'none';
             }
-        ]
-    },
-    options: {
-        responsive: true,
-        plugins: {
-            legend: { position: 'top' },
-            tooltip: { mode: 'index', intersect: false }
-        },
-        interaction: { mode: 'nearest', axis: 'x', intersect: false },
-        scales: {
-            x: { title: { display: true, text: 'Date' } },
-            y: { title: { display: true, text: 'Load (MW)' } }
+        });
+    });
+});
+
+// ===============================
+// Dark / Light Theme Toggle
+// ===============================
+const themeBtn = document.getElementById('themeToggle');
+themeBtn.addEventListener('click', () => {
+    document.body.classList.toggle('dark');
+    document.body.classList.toggle('light');
+    localStorage.setItem('theme', document.body.classList.contains('dark') ? 'dark' : 'light');
+});
+
+// Apply saved theme on load
+const savedTheme = localStorage.getItem('theme');
+if(savedTheme){
+    document.body.classList.remove('dark','light');
+    document.body.classList.add(savedTheme);
+}
+
+// ===============================
+// Optional Login Simulation
+// ===============================
+const loginBtn = document.getElementById('loginBtn');
+if(loginBtn){
+    loginBtn.addEventListener('click', () => {
+        const username = document.getElementById('username')?.value;
+        const password = document.getElementById('password')?.value;
+
+        if(username && password){
+            document.getElementById('loginSection').style.display = 'none';
+            document.querySelector('.main').style.display = 'block';
+        } else {
+            alert("Please enter username and password!");
         }
-    }
+    });
+}
+
+// ===============================
+// Smooth page load animations
+// ===============================
+window.addEventListener('load', () => {
+    pages.forEach(p => {
+        if(p.style.display === 'block'){
+            p.style.opacity = 0;
+            setTimeout(()=>p.style.opacity=1, 50);
+        }
+    });
 });
 
-// Bar chart for model comparison
-let modelChart = modelCtx && new Chart(modelCtx, {
-    type: 'bar',
-    data: {
-        labels: ['ARIMA', 'Prophet', 'LSTM'], // Model names
-        datasets: [{
-            label: 'Accuracy (%)',
-            data: [0,0,0], // Initial dummy values
-            backgroundColor: ['#2563EB','#10B981','#EF4444']
-        }]
-    },
-    options: {
-        responsive: true,
-        plugins: { legend: { display: false }, tooltip: { enabled: true } },
-        scales: {
-            y: { beginAtZero: true, max: 100, title: { display: true, text: 'Accuracy (%)' } },
-            x: { title: { display: true, text: 'Models' } }
-        },
-        animation: { duration: 500 }
-    }
-});
+// ===============================
+// Optional: AI popup animation
+// ===============================
+function showAIPopup(message){
+    const popup = document.getElementById('aiPopup');
+    popup.textContent = message;
+    popup.style.opacity = 0;
+    popup.style.transition = 'opacity 0.5s ease-in-out';
+    popup.style.display = 'block';
+    setTimeout(()=>popup.style.opacity=1, 50);
 
-// Function to update charts with new data
-function updateCharts(data){
-    if(loadChart && data.dates && data.actual && data.predicted){
-        loadChart.data.labels = data.dates;
-        loadChart.data.datasets[0].data = data.actual;
-        loadChart.data.datasets[1].data = data.predicted;
-        loadChart.update();
-    }
-    if(modelChart && data.modelAccuracy){
-        modelChart.data.datasets[0].data = data.modelAccuracy;
-        modelChart.update();
-    }
+    setTimeout(()=>{
+        popup.style.opacity=0;
+        setTimeout(()=>popup.style.display='none', 500);
+    }, 4000);
 }
