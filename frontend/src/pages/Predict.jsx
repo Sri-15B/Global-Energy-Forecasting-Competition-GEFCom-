@@ -1,16 +1,51 @@
 import { useState } from "react";
-import { predictLoad } from "../api";
 import ExplanationModal from "../components/ExplanationModal";
 
 export default function Predict() {
   const [inputs, setInputs] = useState(["", "", "", "", ""]);
   const [prediction, setPrediction] = useState(null);
   const [showExplain, setShowExplain] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  // ✅ Inline API function (Fix for Netlify)
+  async function predictLoad(features) {
+    try {
+      const res = await fetch(
+        "https://global-energy-forecasting-competition.onrender.com/predict",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ features }),
+        }
+      );
+
+      if (!res.ok) {
+        throw new Error("Backend error: " + res.status);
+      }
+
+      return res.json();
+    } catch (err) {
+      throw err;
+    }
+  }
 
   const runPredict = async () => {
-    const nums = inputs.map(Number);
-    const out = await predictLoad(nums);
-    setPrediction(out);
+    setLoading(true);
+    setError("");
+    setPrediction(null);
+
+    try {
+      const nums = inputs.map(Number);
+      const out = await predictLoad(nums);
+
+      // expect {prediction: value}
+      setPrediction(out.prediction);
+    } catch (err) {
+      setError(err.message);
+    }
+
+    setLoading(false);
   };
 
   return (
@@ -41,9 +76,17 @@ export default function Predict() {
       <button
         className="bg-blue-600 text-white px-5 py-2 rounded-lg hover:bg-blue-700 transition"
         onClick={runPredict}
+        disabled={loading}
       >
-        Predict
+        {loading ? "Predicting..." : "Predict"}
       </button>
+
+      {/* Error Message */}
+      {error && (
+        <p className="text-red-600 font-semibold mt-4">
+          ❌ {error}
+        </p>
+      )}
 
       {/* Prediction Output */}
       {prediction !== null && (
