@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { predictLoad } from "../api";
+import { predictLoad } from "../apo";
 import ExplanationModal from "../components/ExplanationModal";
 
 export default function Predict() {
