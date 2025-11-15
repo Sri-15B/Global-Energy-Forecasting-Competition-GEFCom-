@@ -1,33 +1,47 @@
-export default function ExplanationModal({ open, onClose, prediction }) {
+import { motion, AnimatePresence } from "framer-motion";
+
+export default function ExplanationModal({ open, prediction, onClose }) {
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm flex justify-center items-center z-50">
-      <div className="bg-white p-6 rounded-xl shadow-xl w-11/12 max-w-lg">
-        <h2 className="text-2xl font-bold text-blue-600 mb-3">
-          AI Explanation
-        </h2>
-
-        <p className="text-gray-700 mb-4">
-          The model predicts an estimated energy load of:
-        </p>
-
-        <p className="text-4xl font-bold text-blue-700 mb-6">
-          {prediction} MW
-        </p>
-
-        <p className="text-gray-600 text-sm mb-6">
-          This prediction is based on the input parameters you provided, using a
-          trained Random Forest model from the Global Energy Forecasting dataset.
-        </p>
-
-        <button
-          className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 w-full"
-          onClick={onClose}
+    <AnimatePresence>
+      <motion.div
+        className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+      >
+        <motion.div
+          className="bg-white dark:bg-gray-900 p-6 rounded-2xl shadow-xl w-11/12 max-w-lg"
+          initial={{ scale: 0.7, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          exit={{ scale: 0.7, opacity: 0 }}
+          transition={{ type: "spring", stiffness: 140 }}
         >
-          Close
-        </button>
-      </div>
-    </div>
+          <h2 className="text-2xl font-bold text-blue-700 dark:text-blue-300 mb-4">
+            AI Explanation
+          </h2>
+
+          <p className="text-gray-700 dark:text-gray-300 leading-relaxed mb-6">
+            Based on the values you entered, the model estimated the energy load
+            to be{" "}
+            <span className="font-bold text-blue-600 dark:text-blue-300">
+              {prediction?.toFixed(2)} MW
+            </span>
+            . The prediction is influenced by numerical relationships between your
+            input features and past energy patterns learned by the model.
+            Higher or lower values in key features may shift the demand
+            estimation accordingly.
+          </p>
+
+          <button
+            onClick={onClose}
+            className="w-full py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition"
+          >
+            Close
+          </button>
+        </motion.div>
+      </motion.div>
+    </AnimatePresence>
   );
 }
