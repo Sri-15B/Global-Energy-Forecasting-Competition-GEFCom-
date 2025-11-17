@@ -1,7 +1,11 @@
 [build]
-  publish = "frontend/dist"
+  # Tell Netlify to run commands from the frontend folder
+  base = "frontend"
+  # Build command (runs inside frontend folder)
   command = "npm run build"
-  # optionally: baseDir = "frontend" (some setups allow this)
+  # Publish directory is relative to base
+  publish = "frontend/dist"
+
 [[redirects]]
   from = "/*"
   to = "/index.html"
